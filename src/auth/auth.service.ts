@@ -1,8 +1,4 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class AuthService {
-  validate(): string {
-    return 'Valid';
-  }
-}
+export class AuthService {}
