@@ -6,12 +6,17 @@ import {
   Post,
   Res,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+
+import { Response } from 'express';
+
+//PROVIDERS
+import { AuthService } from './auth.service';
+import { UserService } from 'src/user/user.service';
+
+//DTO
 import { RegisterDTO } from './dto/register.dto';
 import { LoginDTO } from './dto/login.dto';
-import { UserService } from 'src/user/user.service';
-import { Response } from 'express';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -38,8 +43,17 @@ export class AuthController {
   @Post('login')
   @ApiOkResponse({ description: 'Login success' })
   @ApiBody({ type: LoginDTO })
-  async login(@Body() LoginDTO: LoginDTO) {
-    // inject appropritate service and handle logic here
-    return 'login';
+  async login(@Body() payload: LoginDTO, @Res() response: Response) {
+    try {
+      const user = await this.userService.login(payload);
+      const token = await this.authService.signPayload({
+        email: payload?.email,
+      });
+      return response.status(HttpStatus.OK).json({ user, token });
+    } catch (e) {
+      return response
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ Message: 'Email or password incorrect' });
+    }
   }
 }

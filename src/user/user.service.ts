@@ -5,13 +5,22 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+
+//DB
 import { Model } from 'mongoose';
+
+//INTERFACES
 import { User } from 'src/user/interfaces/user';
 
+//DTO
 import { GetAllUserDto } from './dto/getAllUser.dto';
-import { LogoutDTO } from './dto/logout.dto';
 import { RegisterDTO } from 'src/auth/dto/register.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
+import { LoginDTO } from 'src/auth/dto/login.dto';
+
+//THIRD PARTY PACAKGES
+import * as bcrypt from 'bcrypt';
+import { signPayload } from 'src/auth/interfaces/signPayload';
 
 @Injectable()
 export class UserService {
@@ -34,18 +43,14 @@ export class UserService {
     return this.sanitizeUser(createdUser);
   }
 
-  sanitizeUser(user: User) {
-    const sanitized = user.toObject();
-    delete sanitized['password'];
-    return sanitized;
-  }
-
-  async findAllUsers(payload: GetAllUserDto) {
+  async getAllUsers(payload: GetAllUserDto) {
     const LIMIT = payload?.limit;
-    const skipCollection = payload?.page ? Number(payload?.page) * LIMIT : 0;
+    const skipCollection = payload?.page
+      ? (Number(payload?.page) - 1) * LIMIT
+      : 0;
     let nextPage = false;
     try {
-      let userData = await this.userModel
+      const userData = await this.userModel
         .find()
         .sort({ createdAt: 'desc' })
         .skip(skipCollection)
@@ -54,7 +59,7 @@ export class UserService {
         .exec();
       if (userData.length > 0) {
         const skipCollectionNext = payload?.page
-          ? (Number(payload?.page) + 1) * LIMIT
+          ? Number(payload?.page) * LIMIT
           : 0;
         const nextPageData = await this.userModel
           .find()
@@ -65,7 +70,6 @@ export class UserService {
         if (nextPageData.length > 0) {
           nextPage = true;
         }
-        userData = userData.slice(skipCollection, skipCollection + LIMIT);
         return {
           data: userData,
           page: Number(payload?.page),
@@ -83,7 +87,7 @@ export class UserService {
         };
       }
     } catch (e) {
-      throw new NotFoundException('Admin users not found');
+      throw new NotFoundException('User not found');
     }
   }
 
@@ -96,27 +100,40 @@ export class UserService {
     }
   }
 
-  async logOut(data: LogoutDTO) {
-    const user = await this.userModel.findOne({ _id: data.userId });
+  async login(UserDTO: LoginDTO) {
+    const { email, password } = UserDTO;
+    const user = await this.userModel.find({ email: UserDTO.email });
     if (!user) {
       throw new HttpException('user doesnt exists', HttpStatus.BAD_REQUEST);
+    }
+    if (await bcrypt.compare(password, user[0].password)) {
+      await this.userModel.findOneAndUpdate(
+        { email: email },
+        { lastloginDate: new Date() },
+        { new: true },
+      );
+      return this.sanitizeUser(user[0]);
     } else {
-      try {
-        await this.userModel.findOneAndUpdate(
-          { _id: data.userId },
-          { verifyToken: '', passwordChanged: 'LoggedOut' },
-          { new: true },
-        );
-      } catch (e) {
-        throw new HttpException(
-          'Token doesnt exists',
-          HttpStatus.UNPROCESSABLE_ENTITY,
-        );
-      }
+      throw new HttpException('invalid credential', HttpStatus.BAD_REQUEST);
     }
   }
 
   async updateUser(payload: UpdateUserDto, userID: string) {
     return { message: 'it works', userID, payload };
+  }
+
+  async test() {
+    return { message: 'it works' };
+  }
+
+  sanitizeUser(user: User) {
+    const sanitized = user.toObject();
+    delete sanitized['password'];
+    return sanitized;
+  }
+
+  async findByPayload(payload: signPayload) {
+    const { email } = payload;
+    return await this.userModel.findOne({ email });
   }
 }
