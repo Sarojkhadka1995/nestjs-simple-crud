@@ -5,8 +5,13 @@ import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 export class RegisterDTO {
   @IsNotEmpty()
   @IsString()
-  @ApiProperty({ type: String, description: 'Name' })
-  name: string;
+  @ApiProperty({ type: String, description: 'First name' })
+  firstName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ type: String, description: 'Last name' })
+  lastName: string;
 
   @IsNotEmpty()
   @IsEmail()
