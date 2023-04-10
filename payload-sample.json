@@ -1,0 +1,11 @@
+/**
+ * Payloads
+ */
+
+//Register
+{
+  "email": "t1@mailinator.com",
+  "password": "test123",
+  "firstName": "test",
+  "lastName": "mailinator"
+}
