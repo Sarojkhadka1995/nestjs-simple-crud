@@ -83,9 +83,11 @@ export class UserController {
   @ApiOkResponse({ description: 'Retrive success' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBearerAuth('access-token')
-  async getUserbyId(@Param('id') id: string) {
+  async getUserbyId(@Param('id') id: string, @Res() response: Response) {
     try {
-      return await this.userService.getUser(id);
+      return response
+        .status(HttpStatus.OK)
+        .json(await this.userService.getUser(id));
     } catch (e) {
       throw new HttpException('No such user found', HttpStatus.BAD_REQUEST);
     }
