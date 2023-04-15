@@ -23,3 +23,11 @@
     "limit": 20,
     "page": 1
 }
+
+//update user
+
+{
+  "firstName" : "Saroj",
+  "lastName":"Khadka",
+  "newEmail": "test@mailinator.com"
+}
