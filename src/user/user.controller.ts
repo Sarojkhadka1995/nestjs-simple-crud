@@ -8,6 +8,7 @@ import {
   HttpStatus,
   UseGuards,
   HttpException,
+  Put,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -62,7 +63,7 @@ export class UserController {
   }
 
   //Update user by id
-  @Post('users:id')
+  @Put(':id')
   @UseGuards(AuthGuard('jwt'))
   @ApiOkResponse({ description: 'Retrive success' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })

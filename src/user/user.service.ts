@@ -119,7 +119,20 @@ export class UserService {
   }
 
   async updateUser(payload: UpdateUserDto, userID: string) {
-    return { message: 'it works', userID, payload };
+    try {
+      const user = await this.userModel.findOneAndUpdate(
+        { _id: userID },
+        {
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+          email: payload.newEmail,
+        },
+        { new: true },
+      );
+      return { message: 'Successfully updated', data: user };
+    } catch (e) {
+      throw new HttpException('Something went wrong', HttpStatus.BAD_REQUEST);
+    }
   }
 
   async test() {
