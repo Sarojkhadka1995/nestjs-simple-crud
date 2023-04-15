@@ -67,7 +67,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\":\"t1@mailinator.com\",\n    \"password\":\"test123\"\n}",
+					"raw": "{\n    \"email\":\"test@mailinator.com\",\n    \"password\":\"test123\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -152,6 +152,39 @@
 					],
 					"path": [
 						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update user",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstName\" : \"Saroj\",\n  \"lastName\":\"Khadka1\",\n  \"newEmail\": \"test@mailinator.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/user/6434186f9efa65102139e96f",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"user",
+						"6434186f9efa65102139e96f"
 					]
 				}
 			},
